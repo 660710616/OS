@@ -8,7 +8,6 @@ static class HeartbeatSender extends Thread {
         this.processTable = processTable;
     }
 
-    @Override
     public void run() {
         while (running) {
             
