@@ -1,0 +1,59 @@
+import java.util.Scanner;
+public class DetectAlive implements Runnable{
+    public boolean alive = true;
+
+    public DetectAlive (){
+        
+    }
+
+    @Override
+    public void run() {
+        
+        for(int i = 1;i<=20;i++){
+            try{
+                Thread.sleep(1000);
+            }
+            catch(InterruptedException e){
+                
+            }
+
+            if(i == 20 ){
+                alive = false;
+                System.out.println(" Dead!");
+                
+            }
+        }
+        throw new UnsupportedOperationException("Unimplemented method 'run'");
+    }
+
+     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        
+        DetectAlive myRunable = new DetectAlive();
+        Thread thread = new Thread(myRunable);
+        
+        thread.setDaemon(true);
+        thread.start();
+        
+        System.out.println("if you dont detect me in 20 second i assume you die");
+        
+        
+
+        System.out.print("IP: ");
+        String name = scanner.nextLine();
+        System.out.println("Hello "+ name);
+        boolean ans = myRunable.alive;
+        System.out.println(ans);
+
+        scanner.close();
+    
+    }
+
+    
+}
+
+
+
+
+   
