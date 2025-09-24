@@ -11,7 +11,7 @@ static class HeartbeatSender extends Thread {
     @Override
     public void run() {
         while (running) {
-            // แสดงว่า heartbeat ถูกส่งจาก process ของตัวเองก่อน
+            
             System.out.println("Sent HEARTBEAT from P" + pid);
 
             for (Map.Entry<Integer, String> entry : processTable.entrySet()) {
