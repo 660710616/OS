@@ -1,0 +1,170 @@
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
+
+public class ProcessNode {
+    int pid;                    
+    int myPort;                 
+    volatile int bossId = -1;   
+    volatile boolean running = true;
+
+    ServerSocket serverSocket;  
+    ExecutorService threadPool = Executors.newCachedThreadPool();
+    Map<Integer, String> processTable = new ConcurrentHashMap<>();
+    Map<Integer, Long> lastHeartbeat = new ConcurrentHashMap<>();
+
+    // ✅ pid จะสุ่มไม่รับจาก args
+    public ProcessNode(int myPort) {
+        this.pid = new Random().nextInt(10000); // pid สุ่ม 0-9999
+        this.myPort = myPort;
+    }
+
+    // ---------------- THREADS ----------------
+    // ✅ Listener หลัก รอ connection เข้ามาแล้วแยกให้ HeartbeatListener/MessageListener
+    class Connection extends Thread {
+        public void run() {
+            try {
+                serverSocket = new ServerSocket(myPort);
+                System.out.println("Listening on port " + myPort);
+                while (running) {
+                    Socket s = serverSocket.accept();
+                    threadPool.submit(() -> {
+                        try (BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
+                            String msg;
+                            while ((msg = in.readLine()) != null) {
+                                if (msg.startsWith("HEARTBEAT:")) {
+                                    int sender = Integer.parseInt(msg.split(":")[1]);
+                                    lastHeartbeat.put(sender, System.currentTimeMillis());
+                                    // จะส่งต่อให้ HeartbeatListener ก็ได้ ถ้าอยาก process แยก
+                                    // threadPool.submit(new HeartbeatListener(s));
+                                } else if (msg.startsWith("ELECTION:")) {
+                                    // TODO: handle Ring Algorithm election
+                                } else if (msg.startsWith("COORDINATOR:")) {
+                                    bossId = Integer.parseInt(msg.split(":")[1]);
+                                    System.out.println("New boss is " + bossId);
+                                }
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class HeartbeatSender extends Thread {
+        public void run() {
+            while (running) {
+                broadcastMessage("HEARTBEAT:" + pid);
+                try { Thread.sleep(5000); } catch (InterruptedException e) {}
+            }
+        }
+    }
+    
+    // ✅ แยกตัวรับ heartbeat โดยเฉพาะ
+    class HeartbeatListener implements Runnable {
+        private Socket socket;
+
+        HeartbeatListener(Socket socket) {
+            this.socket = socket;
+        }
+
+        public void run() {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+                String msg;
+                while ((msg = in.readLine()) != null) {
+                    if (msg.startsWith("HEARTBEAT:")) {
+                        int sender = Integer.parseInt(msg.split(":")[1]);
+                        lastHeartbeat.put(sender, System.currentTimeMillis());
+                        // System.out.println("Heartbeat received from " + sender);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    // ✅ แยกตัวรับข้อความทั่วไป (Election, Coordinator)
+    class MessageListener implements Runnable {
+        private Socket socket;
+
+        MessageListener(Socket socket) {
+            this.socket = socket;
+        }
+
+        public void run() {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+                String msg;
+                while ((msg = in.readLine()) != null) {
+                    if (msg.startsWith("ELECTION:")) {
+                        // TODO: handle Ring Algorithm election
+                    } else if (msg.startsWith("COORDINATOR:")) {
+                        bossId = Integer.parseInt(msg.split(":")[1]);
+                        System.out.println("New boss is " + bossId);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class FailureDetector extends Thread {
+        public void run() {
+            while (running) {
+                long now = System.currentTimeMillis();
+                for (Integer p : lastHeartbeat.keySet()) {
+                    if (now - lastHeartbeat.get(p) > 20000) {
+                        System.out.println("Process " + p + " failed!");
+                        startElection();
+                    }
+                }
+                try { Thread.sleep(5000); } catch (InterruptedException e) {}
+            }
+        }
+    }
+
+    
+
+    // ---------------- CORE LOGIC ----------------
+    void broadcastMessage(String msg) {
+        for (Map.Entry<Integer, String> entry : processTable.entrySet()) {
+            String hostPort = entry.getValue();
+            String[] parts = hostPort.split(":");
+            String host = parts[0];
+            int port = Integer.parseInt(parts[1]);
+            try (Socket s = new Socket(host, port);
+                 PrintWriter out = new PrintWriter(s.getOutputStream(), true)) {
+                out.println(msg);
+            } catch (IOException e) {
+                // process อาจจะตาย
+            }
+        }
+    }
+
+    void startElection() {
+        System.out.println("Election started by " + pid);
+        // TODO: ส่ง ELECTION message ไปหาคนถัดไปใน ring
+    }
+
+    // ---------------- MAIN ----------------
+    public static void main(String[] args) {
+        // args[0] = myPort
+        int myPort = Integer.parseInt(args[0]);
+
+        ProcessNode node = new ProcessNode(myPort);
+
+        // TODO: โหลด processTable จาก config หรือ dynamic register
+
+        new Thread(node.new HeartbeatSender()).start();
+        new Thread(node.new FailureDetector()).start();
+        new Thread(node.new Connection()).start();
+
+        System.out.println("Process " + node.pid + " started at port " + myPort);
+    }
+}
