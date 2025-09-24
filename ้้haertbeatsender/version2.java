@@ -1,6 +1,17 @@
-private class HeartbeatSender extends Thread {
+static class HeartbeatSender extends Thread {
+        private final int pid;
+        private final Map<Integer, String> processTable;
+        private volatile boolean running = true;
+
+        HeartbeatSender(int pid, Map<Integer, String> processTable) {
+            this.pid = pid;
+            this.processTable = processTable;
+        }
+
+        @Override
         public void run() {
             while (running) {
+                
                 String msg = "HEARTBEAT:" + pid;
 
                 for (Map.Entry<Integer, String> entry : processTable.entrySet()) {
@@ -19,11 +30,10 @@ private class HeartbeatSender extends Thread {
                         System.out.println("[P" + pid + "] failed to send heartbeat to P" + targetPid);
                     }
                 }
-
                 System.out.println("Sent HEARTBEAT from P" + pid);
 
                 try {
-                    Thread.sleep(1000); 
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
@@ -31,3 +41,5 @@ private class HeartbeatSender extends Thread {
             }
         }
     }
+}
+
