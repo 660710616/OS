@@ -1,48 +1,49 @@
 static class HeartbeatSender extends Thread {
-        private final int pid;
-        private final Map<Integer, String> processTable;
-        private volatile boolean running = true;
+    private final int pid;
+    private final Map<Integer, String> processTable;
+    private volatile boolean running = true;
 
-        HeartbeatSender(int pid, Map<Integer, String> processTable) {
-            this.pid = pid;
-            this.processTable = processTable;
-        }
+    HeartbeatSender(int pid, Map<Integer, String> processTable) {
+        this.pid = pid;
+        this.processTable = processTable;
+    }
 
-        @Override
-        public void run() {
-            while (running) {
+    @Override
+    public void run() {
+        while (running) {
+            // แสดงว่า heartbeat ถูกส่งจาก process ของตัวเองก่อน
+            System.out.println("Sent HEARTBEAT from P" + pid);
 
-                String msg = "HEARTBEAT:" + pid;
+            for (Map.Entry<Integer, String> entry : processTable.entrySet()) {
+                int targetPid = entry.getKey();
+                if (targetPid == pid)
+                    continue; // ไม่ส่งให้ตัวเอง
 
-                for (Map.Entry<Integer, String> entry : processTable.entrySet()) {
-                    int targetPid = entry.getKey();
-                    if (targetPid == pid)
-                        continue; // ไม่ส่งให้ตัวเอง
+                String[] ipPort = entry.getValue().split(":");
+                String ip = ipPort[0];
+                int port = Integer.parseInt(ipPort[1]);
 
-                    String[] ipPort = entry.getValue().split(":");
-                    String ip = ipPort[0];
-                    int port = Integer.parseInt(ipPort[1]);
+                // แสดง log การส่ง heartbeat ไป process อื่น ๆ
+                System.out.println("[Process" + pid + "]Sending heartbeat to P" + targetPid);
 
-                    System.out.println("Sending heartbeat to P" + targetPid + " at " + ip + ":" + port);
-
-                
-                    try (Socket socket = new Socket(ip, port);
-                            PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-                        out.println("HEARTBEAT:" + pid);
-                    } catch (IOException e) {
-                        System.out.println("[P" + pid + "] failed to send heartbeat to P" + targetPid);
-                    }
-                }
-
-                System.out.println("Sent HEARTBEAT from P" + pid);
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
+                try (Socket socket = new Socket(ip, port);
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+                    out.println("HEARTBEAT:" + pid);
+                } catch (IOException e) {
+                    System.out.println("[Process" + pid + "] failed to send heartbeat to P" + targetPid);
                 }
             }
+
+            try {
+                Thread.sleep(1000); // ส่ง heartbeat ทุก 1 วินาที
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
+    }
+
+    public void stopHeartbeat() {
+        running = false;
     }
 }
