@@ -23,7 +23,7 @@ private class HeartbeatSender extends Thread {
                 System.out.println("Sent HEARTBEAT from P" + pid);
 
                 try {
-                    Thread.sleep(1000); // ทุก 1 วินาที
+                    Thread.sleep(1000); 
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
