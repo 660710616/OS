@@ -7,36 +7,46 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 class Connection extends Thread {
-        public void run() {
-            try {
-                serverSocket = new ServerSocket(myPort);
-                System.out.println("Listening on port " + myPort);
-                while (running) {
-                    Socket s = serverSocket.accept();
-                    System.out.println("Connected");
-                    threadPool.submit(() -> {
-                        try (BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
-                            String msg;
-                            while ((msg = in.readLine()) != null) {
-                                if (msg.startsWith("HEARTBEAT:")) {
-                                    int sender = Integer.parseInt(msg.split(":")[1]);
-                                    lastHeartbeat.put(sender, System.currentTimeMillis());
-                                    threadPool.submit(new HeartbeatListener(s));
-                                } else if (msg.startsWith("ELECTION:")) {
-                                    FailureDetector fd = new FailureDetector();
-                                    fd.startElection();
-                                } else if (msg.startsWith("COORDINATOR:")) {
-                                    bossId = Integer.parseInt(msg.split(":")[1]);
-                                    System.out.println("New boss is " + bossId);
-                                }
+    public void run() {
+        try {
+            serverSocket = new ServerSocket(myPort);
+            System.out.println("Listening on port " + myPort);
+            while (running) {
+                Socket s = serverSocket.accept();
+                System.out.println("Connected");
+                threadPool.submit(() -> {
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
+                        String msg;
+                        while ((msg = in.readLine()) != null) {
+                            if (msg.startsWith("HEARTBEAT:")) {
+                                int sender = Integer.parseInt(msg.split(":")[1]);
+                                lastHeartbeat.put(sender, System.currentTimeMillis());
+                                threadPool.submit(new HeartbeatListener(s));
+                            } else if (msg.startsWith("ELECTION:")) {
+                                FailureDetector fd = new FailureDetector();
+                                fd.startElection();
+                            } else if (msg.startsWith("COORDINATOR:")) {
+                                bossId = Integer.parseInt(msg.split(":")[1]);
+                                System.out.println("New boss is " + bossId);
                             }
-                        } catch (IOException e) {
-                            e.printStackTrace();
                         }
-                    });
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+
+    public void end() {
+        try {
+            if (!running) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
