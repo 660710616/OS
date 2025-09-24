@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-class HeartbeatListener implements Runnable {
+class HeartbeatListener extends Thread {
         private Socket socket;
 
         HeartbeatListener(Socket socket) {
