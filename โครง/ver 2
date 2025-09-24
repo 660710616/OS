@@ -29,6 +29,7 @@ public class ProcessNode {
                 System.out.println("Listening on port " + myPort);
                 while (running) {
                     Socket s = serverSocket.accept();
+                    System.out.println("Connected with " + s.getInetAddress() + " " + s.getPort());
                     threadPool.submit(() -> {
                         try (BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
                             String msg;
