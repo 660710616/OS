@@ -11,25 +11,29 @@ static class HeartbeatSender extends Thread {
         @Override
         public void run() {
             while (running) {
-                
+
                 String msg = "HEARTBEAT:" + pid;
 
                 for (Map.Entry<Integer, String> entry : processTable.entrySet()) {
                     int targetPid = entry.getKey();
-                    if (targetPid == pid) continue;
+                    if (targetPid == pid)
+                        continue; // ไม่ส่งให้ตัวเอง
 
-                    String[] hostPort = entry.getValue().split(":");
-                    String host = hostPort[0];
-                    int targetPort = Integer.parseInt(hostPort[1]);
+                    String[] ipPort = entry.getValue().split(":");
+                    String ip = ipPort[0];
+                    int port = Integer.parseInt(ipPort[1]);
 
-                    try (Socket socket = new Socket(host, targetPort);
-                         PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-                        out.println(msg);
-                        System.out.println("[P" + pid + "] send heartbeat to P" + targetPid);
+                    System.out.println("Sending heartbeat to P" + targetPid + " at " + ip + ":" + port);
+
+                
+                    try (Socket socket = new Socket(ip, port);
+                            PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+                        out.println("HEARTBEAT:" + pid);
                     } catch (IOException e) {
                         System.out.println("[P" + pid + "] failed to send heartbeat to P" + targetPid);
                     }
                 }
+
                 System.out.println("Sent HEARTBEAT from P" + pid);
 
                 try {
@@ -42,4 +46,3 @@ static class HeartbeatSender extends Thread {
         }
     }
 }
-
