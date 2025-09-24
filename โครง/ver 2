@@ -14,14 +14,14 @@ public class ProcessNode {
     Map<Integer, String> processTable = new ConcurrentHashMap<>();
     Map<Integer, Long> lastHeartbeat = new ConcurrentHashMap<>();
 
-    // ✅ pid จะสุ่มไม่รับจาก args
+    //pid จะสุ่มไม่รับจาก args
     public ProcessNode(int myPort) {
         this.pid = new Random().nextInt(10000); // pid สุ่ม 0-9999
         this.myPort = myPort;
     }
 
     // ---------------- THREADS ----------------
-    // ✅ Listener หลัก รอ connection เข้ามาแล้วแยกให้ HeartbeatListener/MessageListener
+    //Listener หลัก รอ connection เข้ามาแล้วแยกให้ HeartbeatListener/MessageListener
     class Connection extends Thread {
         public void run() {
             try {
@@ -89,7 +89,7 @@ public class ProcessNode {
         }
     }
     
-    // ✅ แยกตัวรับข้อความทั่วไป (Election, Coordinator)
+    //แยกตัวรับข้อความทั่วไป (Election, Coordinator)
     class MessageListener implements Runnable {
         private Socket socket;
 
