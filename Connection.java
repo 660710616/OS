@@ -14,6 +14,7 @@ class Connection extends Thread {
             while (running) {
                 Socket s = serverSocket.accept();
                 System.out.println("Connected");
+                new HeartListener(s).start();
                 threadPool.submit(() -> {
                     try (BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
                         String msg;
