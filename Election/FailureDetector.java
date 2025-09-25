@@ -3,8 +3,8 @@ class FailureDetector extends Thread {
             while (running) {
                 long now = System.currentTimeMillis();
                 for (Integer p : new HashSet<>(lastHeartbeat.keySet())) {
-                    if (now - lastHeartbeat.get(p) > 20000) { // 20 วินาที
-                        System.out.println("⚠️ Process " + p + " failed!");
+                    if (now - lastHeartbeat.get(p) > 20000) {
+                        System.out.println("Process " + p + " failed!");
                         lastHeartbeat.remove(p);
                         if (!election) {
                             startElection();
