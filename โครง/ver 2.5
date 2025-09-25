@@ -1,0 +1,142 @@
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
+
+public class ProcessNode {
+    int pid;                    
+    int myPort;                 
+    volatile int bossId = -1;   
+    volatile boolean running = true;
+    volatile boolean election = false;
+
+    ServerSocket serverSocket;  
+    ExecutorService threadPool = Executors.newCachedThreadPool();
+    Map<Integer, String> processTable = new ConcurrentHashMap<>();
+    Map<Integer, Long> lastHeartbeat = new ConcurrentHashMap<>();
+
+    public ProcessNode(int myPort) {
+        this.pid = new Random().nextInt(10000); // pid สุ่ม 0-9999
+        this.myPort = myPort;
+    }
+
+    // ---------------- THREADS ----------------
+    class Listener extends Thread {
+        public void run() {
+            try {
+                serverSocket = new ServerSocket(myPort);
+                System.out.println("Listening on port " + myPort);
+                while (running) {
+                    Socket s = serverSocket.accept();
+                    System.out.println("Connected with " + s.getInetAddress() + " " + s.getPort());
+                    threadPool.submit(() -> {
+                        try (BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
+                            String msg;
+                            while ((msg = in.readLine()) != null) {
+                                
+                                if (msg.startsWith("HEARTBEAT:")) {
+                                    int sender = Integer.parseInt(msg.split(":")[1]);
+                                    lastHeartbeat.put(sender, System.currentTimeMillis());
+                                    System.out.println("receive heartbeat From " + sender);
+                                } 
+
+                                else if (msg.startsWith("ELECTION:")) {
+                                    int sender = Integer.parseInt(msg.split(":")[1]);
+                                    System.out.println("receive election From " + sender);
+                                    ArrayList<Integer> ids = new ArrayList<>(processTable.keySet());
+                                    int index = ids.indexOf(pid);
+                                    int nextIndex = (index + 1) % ids.size(); 
+                                    int nextP = ids.get(nextIndex);
+                                    sendElection(nextP, msg.split(":")[0]+msg.split(":")[2]);
+                                } 
+
+                                else if (msg.startsWith("COORDINATOR:")) {
+                                    election = false;
+                                    bossId = Integer.parseInt(msg.split(":")[1]);
+                                    System.out.println("New boss is " + bossId);
+                                }
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class HeartbeatSender extends Thread {}
+
+    class FailureDetector extends Thread {}
+
+    void broadcastMessage(String msg) {}
+
+    void startElection() {
+        election = true;
+        Set<Integer> processes = new HashSet<>();
+        processes.add(this.pid);
+        ArrayList<Integer> ids = new ArrayList<>(processTable.keySet());
+        int index = ids.indexOf(pid);
+        int nextIndex = (index + 1) % ids.size(); 
+        int nextP = ids.get(nextIndex);
+
+        sendElection(nextP, "ELECTION:" + pid + ":" + processes);
+    }
+
+    void sendElection(int pid, String message){
+        String address = processTable.get(pid);
+        if(address == null){
+            return;
+        }
+    
+        String[] split = address.split(":");
+        if(pid == this.pid){
+            String P = split[2]; 
+            P = P.substring(1, P.length()-1);
+            String[] temp = P.split(",");
+            Set<Integer> candidate = new HashSet<>();
+            for(String x : temp){
+                int num = Integer.parseInt(x);
+                candidate.add(num);
+            }
+
+            int boss = Collections.max(candidate);
+            this.bossId = boss;
+            sentCoordinator(boss);
+        }
+
+        String host = split[0];
+        int port = Integer.parseInt(split[1]);
+        try (Socket socket = new Socket(host, port);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+            out.println(message);
+            System.out.println("Send to " + pid + ": " + message);
+        } catch (IOException e) {
+            System.err.println("Failed to send to " + pid);
+            e.printStackTrace();
+        }
+    }
+
+    void sentCoordinator(int boss){
+        String message = "COORDINATOR:" + boss;
+       
+    }
+
+    // ---------------- MAIN ----------------
+    public static void main(String[] args) {
+        // args[0] = myPort
+        int myPort = Integer.parseInt(args[0]);
+
+        ProcessNode node = new ProcessNode(myPort);
+
+        // TODO: โหลด processTable จาก config หรือ dynamic register
+
+        new Thread(node.new HeartbeatSender()).start();
+        new Thread(node.new FailureDetector()).start();
+        new Thread(node.new Listener()).start();
+
+        System.out.println("Process " + node.pid + " started at port " + myPort);
+    }
+}
