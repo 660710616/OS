@@ -1,4 +1,4 @@
-static class HeartbeatSender extends Thread {
+class HeartbeatSender extends Thread {
     private final int pid;
     private final Map<Integer, String> processTable;
     private volatile boolean running = true;
