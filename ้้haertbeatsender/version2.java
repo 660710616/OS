@@ -16,20 +16,20 @@ class HeartbeatSender extends Thread {
             for (Map.Entry<Integer, String> entry : processTable.entrySet()) {
                 int targetPid = entry.getKey();
                 if (targetPid == pid)
-                    continue; // ไม่ส่งให้ตัวเอง
+                    continue; 
 
                 String[] ipPort = entry.getValue().split(":");
                 String ip = ipPort[0];
                 int port = Integer.parseInt(ipPort[1]);
 
                 // แสดง log การส่ง heartbeat ไป process อื่น ๆ
-                System.out.println("[Process" + pid + "]Sending heartbeat to P" + targetPid);
+                System.out.println("[P" + pid + "]Sending heartbeat to P" + targetPid);
 
                 try (Socket socket = new Socket(ip, port);
                      PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
                     out.println("HEARTBEAT:" + pid);
                 } catch (IOException e) {
-                    System.out.println("[Process" + pid + "] failed to send heartbeat to P" + targetPid);
+                    System.out.println("[P" + pid + "] failed to send heartbeat to P" + targetPid);
                 }
             }
 
