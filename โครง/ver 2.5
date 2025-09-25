@@ -104,7 +104,7 @@ public class ProcessNode {
 
             int boss = Collections.max(candidate);
             this.bossId = boss;
-            sentCoordinator(boss);
+            //sentCoordinator(boss);
         }
 
         String host = split[0];
@@ -119,10 +119,6 @@ public class ProcessNode {
         }
     }
 
-    void sentCoordinator(int boss){
-        String message = "COORDINATOR:" + boss;
-       
-    }
 
     // ---------------- MAIN ----------------
     public static void main(String[] args) {
