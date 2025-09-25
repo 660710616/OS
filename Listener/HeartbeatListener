@@ -1,0 +1,29 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+
+class HeartbeatListener extends Thread {
+        private Socket socket;
+
+        HeartbeatListener(Socket socket) {
+            this.socket = socket;
+        }
+
+        public void run() {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+                String msg;
+                while ((msg = in.readLine()) != null) {
+                    if (msg.startsWith("HEARTBEAT:")) {
+                        Connection connection = new Connection();
+                        connection.run();
+                        int sender = Integer.parseInt(msg.split(":")[1]);
+                        lastHeartbeat.put(sender, System.currentTimeMillis());
+                        System.out.println("Heartbeat received from " + sender);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
