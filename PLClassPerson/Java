@@ -1,0 +1,62 @@
+import java.util.Scanner;
+
+public class Person {
+    String name;
+    int age;
+    String sex;
+    double height;
+    double weight;
+    int x;
+
+    Person(String name, int age, String sex){
+        this.name = name;
+        this.age = age;
+        this.sex = sex;
+        height = 160.0;
+        weight = 50.0;
+    }
+
+    public void WalkAhead(int distance){
+        System.out.println("Walk forward: " + distance + " meters.");
+    }
+    public void WalkAhead(){
+        System.out.println("You're stand still didn't walk forward.");
+    }
+
+    public boolean CanDrink(){
+        if(age > 20){
+            return true;
+        }
+        return false;
+    }
+
+    public String toString(){
+        return "Name: " + name + " Age: " + age + " Sex: " + sex + " Height: " + height + " Weight: " + weight;
+    }
+}
+
+class Demo {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Please Enter your name: ");
+        String name = sc.next();
+        System.out.print("Please Enter your age: ");
+        int age = sc.nextInt();
+        System.out.print("Please Enter your gender: ");
+        String gender = sc.next();
+
+        Person p1 = new Person(name, age, gender);
+        
+        p1.WalkAhead();
+        p1.WalkAhead(10);
+        if(p1.CanDrink()){
+            System.out.println("I can drink.");
+        }else{
+            System.out.println("I can't drink.");
+        }
+        System.out.println(p1.toString());
+
+
+        sc.close();
+    }
+}
