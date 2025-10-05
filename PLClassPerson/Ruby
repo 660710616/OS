@@ -8,21 +8,13 @@ class Person
         @weight = 50.0
         @x = 0
     end
-    def WalkAhead(*args)
-        distance = args[0].nil? ? 0 : args[0] #nil->0, not nil->args[0]
+    def WalkAhead(distance=0)
         @x += distance
-        puts "#{@name} walked ahead #{@x} meters."
     end
     def CanDrink
         @age > 20
     end
     def to_s #override to_s method
         "#{@name}[#{@age}]"
-    end
-    def turnLeft
-        puts "#{@name} turned left"
-    end
-    def turnRight
-        puts "#{@name} turned right"
     end
 end
