@@ -84,3 +84,6 @@ class TestPerson {
         }
     }
 }
+//terminal
+//javac Person.java
+//java TestPerson
