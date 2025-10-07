@@ -8,7 +8,7 @@ public class Person {
     double weight;
     int x;
 
-    Person(String name, int age, String sex) {
+    Person(String name, int age, String sex){
         this.name = name;
         this.age = age;
         this.sex = sex;
@@ -16,23 +16,22 @@ public class Person {
         weight = 50.0;
     }
 
-    public void WalkAhead(int distance) {
+    public void WalkAhead(int distance){
         System.out.println("Walk forward: " + distance + " meters.");
     }
-
-    public void WalkAhead() {
+    public void WalkAhead(){
         System.out.println("You're stand still didn't walk forward.");
     }
 
-    public boolean CanDrink() {
-        if (age > 20) {
+    public boolean CanDrink(){
+        if(age > 20){
             return true;
         }
         return false;
     }
 
-    public String toString() {
-        return "Name: " + name + " Age: " + age + " Sex: " + sex + " Height: " + height + " Weight: " + weight;
+    public String toString(){
+        return name + " [ " + age + " ] ";
     }
 }
 
@@ -47,15 +46,16 @@ class Demo {
         String gender = sc.next();
 
         Person p1 = new Person(name, age, gender);
-
+        
         p1.WalkAhead();
         p1.WalkAhead(10);
-        if (p1.CanDrink()) {
+        if(p1.CanDrink()){
             System.out.println("I can drink.");
-        } else {
+        }else{
             System.out.println("I can't drink.");
         }
         System.out.println(p1.toString());
+
 
         sc.close();
     }
@@ -69,14 +69,11 @@ class TestPerson {
         p1.height = 160;
         p1.weight = 199;
 
-        System.out.println("=== Test Object Values ===");
         System.out.println(p1.toString());
 
-        System.out.println("\n=== Test WalkAhead ===");
         p1.WalkAhead();
         p1.WalkAhead(10);
 
-        System.out.println("\n=== Test CanDrink ===");
         if (p1.CanDrink()) {
             System.out.println(p1.name + " can drink.");
         } else {
@@ -84,6 +81,3 @@ class TestPerson {
         }
     }
 }
-//terminal
-//javac Person.java
-//java TestPerson
