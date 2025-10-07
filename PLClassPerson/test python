@@ -1,0 +1,33 @@
+class Person:
+    def __init__(self, name, age, sex):
+        self.name = name
+        self.age = age
+        self.sex = sex
+        self.height = 160.0
+        self.weight = 50.0
+        self.x = 0
+
+    def walk_ahead(self, distance=0):
+        self.x += distance
+
+    def can_drink(self):
+        return self.age > 20
+
+    def __str__(self):  #toString()
+        return f"{self.name}[{self.age}]"
+
+if __name__ == "__main__":
+    p1 = Person("Eve", 19, "female")
+
+    p1.height = 160
+    p1.weight = 199
+
+    print(p1.walk_ahead(10))
+    print(p1.x)
+
+    if p1.can_drink():
+        print(f"{p1.name} can drink.")
+    else:
+        print(f"{p1.name} cannot drink.")
+
+    print(p1.__str__())
