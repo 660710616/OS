@@ -1,0 +1,39 @@
+class Person
+  attr_accessor :name, :age, :sex, :height, :weight, :x
+
+  def initialize(name, age, sex)
+    @name = name
+    @age = age
+    @sex = sex
+    @height = 160.0
+    @weight = 50.0
+    @x = 0
+  end
+
+  def WalkAhead(distance=0)
+    @x += distance
+  end
+
+  def CanDrink
+    @age > 20
+  end
+
+  def to_s
+    "#{@name}[#{@age}]"
+  end
+end
+
+p1 = Person.new("Eve", 19, "female")
+p1.height = 160
+p1.weight = 199
+
+p1.WalkAhead(10)
+puts "walk ahead = #{p1.x}"
+
+if p1.CanDrink
+  puts "#{p1.name} can drink."
+else
+  puts "#{p1.name} cannot drink."
+end
+
+puts p1.to_s
