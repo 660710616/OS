@@ -18,7 +18,6 @@ public class Server {
     int myPort = 5001; //copyPort
     int zeroPort = 5002; //zeroport
 
-    ServerSocket serverSocket;
     ServerSocketChannel serverChannel;
     ServerSocketChannel zeroCopyChannel;
     BufferedReader clientInput;
@@ -159,7 +158,7 @@ public class Server {
                     fs = "KB";
                     size = size / 1024;
                 }
-                files += count + "File name: " + x.getName() + " File size: " + size + " " + fs + "\n";
+                files += count + ". File name: " + x.getName() + " File size: " + size + " " + fs + "\n";
                 count++;
             }
             count = 1;
