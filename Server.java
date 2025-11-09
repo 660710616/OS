@@ -36,6 +36,7 @@ public class Server {
                 while (true) {
                     clientChannel = serverChannel.accept();
                     clientSocket = clientChannel.socket();
+                    toClient = new PrintWriter(clientSocket.getOutputStream(), true);
                     BufferedReader clientInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     command = clientInput.readLine();
                     if(command.equals("f")){
@@ -149,14 +150,8 @@ public class Server {
                 count++;
             }
             count = 1;
-            try{
-                toClient = new PrintWriter(clientSocket.getOutputStream(), true);
-                toClient.println(files);
-                toClient.println("EOF");
-            }
-            catch(IOException e){
-                e.printStackTrace();
-            }
+            toClient.println(files);
+            toClient.println("EOF");
         }
         else{
             System.out.println("There are no in the server.");
