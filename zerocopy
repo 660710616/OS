@@ -8,7 +8,7 @@ private void zeroCopyFile(File file, SocketChannel clientChannel) {
         long position = 0;
         long fileSize = sourceFile.size();
         long transferred;
-        System.out.println("Start sending file (Zero-Copy)...");
+        System.out.println("Start sending file (Zero-Copy)");
 
         while (position < fileSize) {
             transferred = sourceFile.transferTo(position, fileSize - position, clientChannel);
