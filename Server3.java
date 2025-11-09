@@ -172,7 +172,7 @@ public class Server {
     }
 
     public static void main(String[] args) {
-        new Server();  
+        Server s = new Server();  
         s.new Handler().start();
     }
 }
