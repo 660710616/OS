@@ -67,8 +67,9 @@ public class Server {
                             }
                             else if(type.equals("2")){
                                 System.out.println("Waiting for Zero-Copy client on port " + zeroPort);
-                                zeroChanel = zeroCopyChannel.accept();
-                                zeroCopyFile(file, clientChannel);
+                                zeroChannel = zeroCopyChannel.accept();
+                                zeroCopyFile(file, zeroChannel);
+                                zeroChannel.close();
                             }
                         }
                         else{
