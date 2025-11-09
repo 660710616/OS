@@ -134,7 +134,7 @@ public class Client {
         FileOutputStream fileToDisk = null;
         try {
             fileToDisk = new FileOutputStream(clientPath + "\\Copy-" + fileName);
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[4096];
             int bytesRead;
             long totalBytesRead = 0;
 
@@ -182,9 +182,15 @@ public class Client {
                 clientSocket.close();
                 System.out.println("Disconnecting server.");
             }
-            clientChannel.close();
-            inByteFromServer.close();
-            outputToServer.close();
+            if (clientChannel != null && !clientChannel.isClosed()) {
+                clientChannel.close();
+            }
+            if (inByteFromServer != null && !inByteFromServer.isClosed()) {
+                inByteFromServer.close();
+            }
+            if (outputToServer != null && !outputToServer.isClosed()) {
+                outputToServer.close();
+            }
         } catch (IOException e) {
             System.err.println("Error closing client socket: " + e.getMessage());
         }
