@@ -1,0 +1,28 @@
+private void zeroCopyFile(File file, SocketChannel clientChannel) {
+    if (clientChannel == null || !clientChannel.isOpen()) {
+        System.err.println("Client channel is not open.");
+        return;
+    }
+
+    try (FileChannel sourceFile = new FileInputStream(file).getChannel()) {
+        long position = 0;
+        long fileSize = sourceFile.size();
+        long transferred;
+        System.out.println("Start sending file (Zero-Copy)...");
+
+        while (position < fileSize) {
+            transferred = sourceFile.transferTo(position, fileSize - position, clientChannel);
+            if (transferred <= 0) break; // ป้องกัน loop ค้าง
+            position += transferred;
+        }
+
+        if (position == fileSize) {
+            System.out.println("File sent successfully (Zero-Copy).");
+        } else {
+            System.err.println("Warning: Not all bytes transferred. Expected: "
+                    + fileSize + ", Transferred: " + position);
+        }
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
