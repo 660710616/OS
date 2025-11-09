@@ -47,37 +47,40 @@ public class Server {
                     toClient = new PrintWriter(clientSocket.getOutputStream(), true);
                     BufferedReader clientInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     
+                    //
                     command = clientInput.readLine();
-                    if(command.equals("f")){
-                        allFiles();
-                    }
-                    else if(command.equals("d")){
-                        String fileName = clientInput.readLine();
-                        File file = new File("C:\\Users\\CYBORG 15\\Desktop\\SU\\year3\\OS\\file\\" + fileName);  //เปลี่ยน path
-                        String type = clientInput.readLine();
+                    while (command != null){
+                        if(command.equals("f")){
+                            allFiles();
+                        }
+                        else if(command.equals("d")){
+                            String fileName = clientInput.readLine();
+                            File file = new File("C:\\Users\\CYBORG 15\\Desktop\\SU\\year3\\OS\\file\\" + fileName);  //เปลี่ยน path
+                            String type = clientInput.readLine();
 
-                        if(file.exists()){
-                            toClient.println("Long");
-                            toClient.println(file.length());
-                            toClient.flush();
+                            if(file.exists()){
+                                toClient.println("Long");
+                                toClient.println(file.length());
+                                toClient.flush();
 
-                            if(type.equals("1")){
-                                copyFile(file, clientSocket);
+                                if(type.equals("1")){
+                                    copyFile(file, clientSocket);
+                                }
+                                else if(type.equals("2")){
+                                    System.out.println("Waiting for Zero-Copy client on port " + zeroPort);
+                                    zeroChannel = zeroCopyChannel.accept();
+                                    zeroCopyFile(file, zeroChannel);
+                                    zeroChannel.close();
+                                }
                             }
-                            else if(type.equals("2")){
-                                System.out.println("Waiting for Zero-Copy client on port " + zeroPort);
-                                zeroChannel = zeroCopyChannel.accept();
-                                zeroCopyFile(file, zeroChannel);
-                                zeroChannel.close();
+                            else{
+                                toClient.println("String");
+                                toClient.println("File does not exist.");
                             }
                         }
-                        else{
-                            toClient.println("String");
-                            toClient.println("File does not exist.");
+                        else if(command.equals("ex")){
+                            System.out.println("Client Disconnected.");
                         }
-                    }
-                    else if(command.equals("ex")){
-                        System.out.println("Client Disconnected.");
                     }
                 }
             } catch (IOException e) {
