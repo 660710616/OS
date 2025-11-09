@@ -45,7 +45,7 @@ public class Server {
                 while (true) {
                     clientChannel = serverChannel.accept();
                     clientSocket = clientChannel.socket();
-                    zeroChannel = zeroCopyChannel.accept();
+                    
                     toClient = new PrintWriter(clientSocket.getOutputStream(), true);
                     BufferedReader clientInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     
@@ -66,6 +66,8 @@ public class Server {
                                 copyFile(file, clientSocket);
                             }
                             else if(type.equals("2")){
+                                System.out.println("Waiting for Zero-Copy client on port " + zeroPort);
+                                zeroChanel = zeroCopyChannel.accept();
                                 zeroCopyFile(file, clientChannel);
                             }
                         }
