@@ -28,7 +28,6 @@ public class Server {
 
     class Handler extends Thread {
         public void run() {
-            // String command;
             try {
                 serverChannel = ServerSocketChannel.open();
                 serverChannel.bind(new InetSocketAddress(IP, myPort));
@@ -52,7 +51,6 @@ public class Server {
                     BufferedReader clientInput = new BufferedReader(
                             new InputStreamReader(clientSocket.getInputStream()));
 
-                    //
                     String command;
                     try{
                         while ((command = clientInput.readLine()) != null) {
@@ -115,7 +113,7 @@ public class Server {
             int bytesRead;
             System.out.println("Start sending file (Copy I/O)..." + file.getName());
 
-            while ((bytesRead = fileInput.read(buffer)) != -1) {// -1 means end of file
+            while ((bytesRead = fileInput.read(buffer)) != -1) {
                 outToClient.write(buffer, 0, bytesRead);
             }
             outToClient.flush();
@@ -140,7 +138,7 @@ public class Server {
             while (position < fileSize) {
                 transferred = sourceFile.transferTo(position, fileSize - position, clientChannel);
                 if (transferred <= 0)
-                    break; // ป้องกัน loop ค้าง
+                    break; 
                 position += transferred;
             }
 
