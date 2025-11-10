@@ -14,9 +14,9 @@ import java.io.File;
 import java.io.PrintWriter;
 
 public class Server {
-    String IP = "192.168.1.115";
-    int myPort = 5001; //copyPort
-    int zeroPort = 5002; //zeroport
+    String IP = "192.168.56.1";
+    int myPort = 5001; // copyPort
+    int zeroPort = 5002; // zeroport
 
     ServerSocketChannel serverChannel;
     ServerSocketChannel zeroCopyChannel;
@@ -27,8 +27,8 @@ public class Server {
     Socket clientSocket;
 
     class Handler extends Thread {
-        public void run(){
-            String command;
+        public void run() {
+            // String command;
             try {
                 serverChannel = ServerSocketChannel.open();
                 serverChannel.bind(new InetSocketAddress(IP, myPort));
@@ -43,44 +43,48 @@ public class Server {
                 while (true) {
                     clientChannel = serverChannel.accept();
                     clientSocket = clientChannel.socket();
-                    
+
                     toClient = new PrintWriter(clientSocket.getOutputStream(), true);
-                    BufferedReader clientInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    
+                    BufferedReader clientInput = new BufferedReader(
+                            new InputStreamReader(clientSocket.getInputStream()));
+
                     //
-                    command = clientInput.readLine();
-                    while (command != null){
-                        if(command.equals("f")){
-                            allFiles();
-                        }
-                        else if(command.equals("d")){
-                            String fileName = clientInput.readLine();
-                            File file = new File("C:\\Users\\CYBORG 15\\Desktop\\SU\\year3\\OS\\file\\" + fileName);  //เปลี่ยน path
-                            String type = clientInput.readLine();
+                    String command;
+                    try{
+                        while ((command = clientInput.readLine()) != null) {
+                            if (command.equals("f")) {
+                                allFiles();
+                            } else if (command.equals("d")) {
+                                String fileName = clientInput.readLine();
+                                File file = new File("C:\\Users\\CYBORG 15\\Desktop\\SU\\year3\\OS\\file\\" + fileName);
+                                String type = clientInput.readLine();
 
-                            if(file.exists()){
-                                toClient.println("Long");
-                                toClient.println(file.length());
-                                toClient.flush();
+                                if (file.exists()) {
+                                    toClient.println("Long");
+                                    toClient.println(file.length());
+                                    toClient.flush();
 
-                                if(type.equals("1")){
-                                    copyFile(file, clientSocket);
+                                    if (type.equals("1")) {
+                                        copyFile(file, clientSocket);
+                                    } else if (type.equals("2")) {
+                                        System.out.println("Waiting for Zero-Copy client on port " + zeroPort);
+                                        zeroChannel = zeroCopyChannel.accept();
+                                        zeroCopyFile(file, zeroChannel);
+                                        zeroChannel.close();
+                                    }
+                                } else {
+                                    toClient.println("String");
+                                    toClient.println("File does not exist.");
                                 }
-                                else if(type.equals("2")){
-                                    System.out.println("Waiting for Zero-Copy client on port " + zeroPort);
-                                    zeroChannel = zeroCopyChannel.accept();
-                                    zeroCopyFile(file, zeroChannel);
-                                    zeroChannel.close();
-                                }
-                            }
-                            else{
-                                toClient.println("String");
-                                toClient.println("File does not exist.");
+                            } else if (command.equals("ex")) {
+                                System.out.println("Client Disconnected.");
+                                break;
                             }
                         }
-                        else if(command.equals("ex")){
-                            System.out.println("Client Disconnected.");
-                        }
+                    }catch (java.nio.channels.ClosedChannelException e) {
+                    
+                    }catch (IOException e){
+                        e.printStackTrace();
                     }
                 }
             } catch (IOException e) {
@@ -96,14 +100,13 @@ public class Server {
         }
 
         try (
-            BufferedInputStream fileInput = new BufferedInputStream(new FileInputStream(file));
-            BufferedOutputStream outToClient = new BufferedOutputStream(clientSocket.getOutputStream());
-        ) {
+                BufferedInputStream fileInput = new BufferedInputStream(new FileInputStream(file));
+                BufferedOutputStream outToClient = new BufferedOutputStream(clientSocket.getOutputStream());) {
             byte[] buffer = new byte[4096];
             int bytesRead;
             System.out.println("Start sending file (Copy I/O)..." + file.getName());
 
-            while ((bytesRead = fileInput.read(buffer)) != -1) {//-1 means end of file
+            while ((bytesRead = fileInput.read(buffer)) != -1) {// -1 means end of file
                 outToClient.write(buffer, 0, bytesRead);
             }
             outToClient.flush();
@@ -112,7 +115,7 @@ public class Server {
             e.printStackTrace();
         }
     }
-    
+
     private void zeroCopyFile(File file, SocketChannel clientChannel) {
         if (clientChannel == null || !clientChannel.isOpen()) {
             System.err.println("Client channel is not open.");
@@ -127,7 +130,8 @@ public class Server {
 
             while (position < fileSize) {
                 transferred = sourceFile.transferTo(position, fileSize - position, clientChannel);
-                if (transferred <= 0) break; // ป้องกัน loop ค้าง
+                if (transferred <= 0)
+                    break; // ป้องกัน loop ค้าง
                 position += transferred;
             }
 
@@ -143,7 +147,7 @@ public class Server {
         }
     }
 
-    private void allFiles(){
+    private void allFiles() {
         File file = new File("C:\\Users\\CYBORG 15\\Desktop\\SU\\year3\\OS\\file");
         File[] folder = file.listFiles();
         String files = "";
@@ -151,14 +155,13 @@ public class Server {
         String fs = "B";
         int count = 1;
 
-        if(folder != null){
-            for(File x : folder){
+        if (folder != null) {
+            for (File x : folder) {
                 size = x.length();
-                if(size > 1000000){
+                if (size > 1000000) {
                     fs = "MB";
-                    size = size / (1024*1024);
-                }
-                else if(size > 1000){
+                    size = size / (1024 * 1024);
+                } else if (size > 1000) {
                     fs = "KB";
                     size = size / 1024;
                 }
@@ -168,14 +171,13 @@ public class Server {
             count = 1;
             toClient.println(files);
             toClient.println("EOF");
-        }
-        else{
+        } else {
             System.out.println("There are no in the server.");
         }
     }
 
     public static void main(String[] args) {
-        Server s = new Server();  
+        Server s = new Server();
         s.new Handler().start();
     }
 }
