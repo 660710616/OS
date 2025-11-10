@@ -80,7 +80,6 @@ public class Server {
                                 }
                             } else if (command.equals("ex")) {
                                 System.out.println("Client Disconnected.");
-                                zeroChannel.close();
                                 break;
                             }
                         }
@@ -189,4 +188,3 @@ public class Server {
         s.new Handler().start();
     }
 }
-
