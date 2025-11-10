@@ -172,7 +172,7 @@ public class Server {
             toClient.println(files);
             toClient.println("EOF");
         } else {
-            System.out.println("There are no in the server.");
+            System.out.println("There are no file in the server.");
         }
     }
 
