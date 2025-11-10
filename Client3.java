@@ -13,7 +13,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Scanner;
 
 public class Client {
-    static String serverIP = "192.168.1.115";
+    static String serverIP = "192.168.56.1";
     static final int port = 5001;
     static final int portChannel = 5002;
     static final String clientPath = "C:\\Users\\CYBORG 15\\Desktop\\SU\\year3\\OS\\client";
