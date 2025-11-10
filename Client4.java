@@ -2,6 +2,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
@@ -11,7 +12,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Scanner;
 
 public class Client {
-    static String serverIP = "192.168.1.115";
+    static String serverIP = "192.168.56.1";
     static final int port = 5001;
     static final int portChannel = 5002;
     static final String clientPath = "C:\\Users\\CYBORG 15\\Desktop\\SU\\year3\\OS\\client";
@@ -30,9 +31,11 @@ public class Client {
             System.out.println("Connected server.");
             System.out.println();
 
-            this.inputFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            //
+            InputStream socketIn = clientSocket.getInputStream();
+            this.inputFromServer = new BufferedReader(new InputStreamReader(socketIn));
             this.outputToServer = new PrintWriter(clientSocket.getOutputStream(), true);
-            this.inByteFromServer = new BufferedInputStream(clientSocket.getInputStream());
+            this.inByteFromServer = new BufferedInputStream(socketIn);
             System.out.println("All files in server");
             outputToServer.println("f");
             String allFiles;
