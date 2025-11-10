@@ -182,15 +182,9 @@ public class Client {
                 clientSocket.close();
                 System.out.println("Disconnecting server.");
             }
-            if (clientChannel != null && !clientChannel.isClosed()) {
-                clientChannel.close();
-            }
-            if (inByteFromServer != null && !inByteFromServer.isClosed()) {
-                inByteFromServer.close();
-            }
-            if (outputToServer != null && !outputToServer.isClosed()) {
-                outputToServer.close();
-            }
+            clientChannel.close();// ปิด SocketChannel สำหรับ zerocopy
+            inByteFromServer.close();// ปิด input stream สำหรับรับข้อมูล byte จาก server (ใช้ตอนดาวน์โหลดแบบ Copy)
+            outputToServer.close();// ปิด output stream สำหรับส่งข้อมูลไปยัง server
         } catch (IOException e) {
             System.err.println("Error closing client socket: " + e.getMessage());
         }
