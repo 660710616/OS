@@ -132,7 +132,7 @@ public class Client {
         FileOutputStream fileToDisk = null;
         try {
             fileToDisk = new FileOutputStream(clientPath + "/Copy-" + fileName);
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[1024];
             int bytesRead;
             long totalBytesRead = 0;
 
