@@ -109,7 +109,7 @@ public class Server {
             fileInput = new BufferedInputStream(new FileInputStream(file));
             outToClient = new BufferedOutputStream(clientSocket.getOutputStream());
 
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[1024];
             int bytesRead;
             System.out.println("Start sending file (Copy I/O)..." + file.getName());
 
